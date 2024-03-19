@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.os.Bundle
+import android.view.View
 import android.widget.RemoteViews
 
 
@@ -47,7 +49,7 @@ class MyWidget : AppWidgetProvider() {
         }
     }
 
-    private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int){
+     private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int){
         val chargeStatus = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 
         val level = chargeStatus?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
@@ -61,6 +63,18 @@ class MyWidget : AppWidgetProvider() {
             batteryPerc > 0.75 -> views.setImageViewResource(R.id.batteryIcon, R.drawable.green_symbol)
             batteryPerc > 0.45 -> views.setImageViewResource(R.id.batteryIcon, R.drawable.orange_symbol)
             else -> views.setImageViewResource(R.id.batteryIcon, R.drawable.red_symbol)
+        }
+
+        val weatherAlert = AppWidgetManager.getInstance(context).getAppWidgetOptions(appWidgetId).getString("weatherAlert", null)
+        if (weatherAlert != null) {
+            // Handle the display of weather alert in the widget
+            // Example: Update a TextView with the weather alert
+            views.setViewVisibility(R.id.weatherAlertText, View.VISIBLE)
+            views.setTextViewText(R.id.weatherAlertText, weatherAlert)
+            // Optionally, reset the weather alert to null after displaying it
+            val options = Bundle()
+            options.putString("weatherAlert", null)
+            appWidgetManager.updateAppWidgetOptions(appWidgetId, options)
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views)

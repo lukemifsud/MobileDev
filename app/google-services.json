@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "583526183823",
+    "project_id": "mobilesynoptic-9ac61",
+    "storage_bucket": "mobilesynoptic-9ac61.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:583526183823:android:90c359ce92339db4ed51fa",
+        "android_client_info": {
+          "package_name": "com.android.application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKslTWXB_sJpmDbYn7h6UxHwTJxT0xW5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
