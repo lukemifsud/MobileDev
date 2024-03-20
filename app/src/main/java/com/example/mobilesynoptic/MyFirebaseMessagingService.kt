@@ -1,9 +1,13 @@
 package com.example.mobilesynoptic
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -13,43 +17,56 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        remoteMessage.data.isNotEmpty().let {
-            val weatherAlert = remoteMessage.data["weatherAlert"]
-            weatherAlert?.let {
-                handleWeatherAlert(applicationContext, it)
+        val title = remoteMessage.notification?.title ?: "Weather Alert"
+        val message = remoteMessage.notification?.body ?: "Extreme weather warning"
+
+        updateWidgetNotification(title,message)
+
+
+
+
+
+    }
+
+    private val CHANNEL_ID = "widget_update"
+    private val CHANNEL_NAME = "Widget Update"
+    private val CHANNEL_DESCRIPTION = "Notification about update to widget"
+    private val CHANNEL_IMPORTANCE = NotificationManager.IMPORTANCE_DEFAULT
+
+    private fun createNotificationChannel() {
+        // Check if the Android Version is Oreo (API 26) or above since NotificationChannel is not supported in the older versions.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, CHANNEL_IMPORTANCE).apply {
+                description = CHANNEL_DESCRIPTION
             }
-        }
-
-
-
-
-
-    }
-
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        Log.d(TAG, "Refreshed token: $token")
-    }
-
-    companion object {
-        private const val TAG = "FCMMessagingService"
-    }
-
-    private fun handleWeatherAlert(context: Context, alert: String) {
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val thisWidget = ComponentName(context, MyWidget::class.java) // Replace WeatherWidget with your actual AppWidgetProvider subclass
-        val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
-
-        appWidgetIds.forEach { appWidgetId ->
-            val options = Bundle()
-            options.putString("weatherAlert", alert)
-            appWidgetManager.updateAppWidgetOptions(appWidgetId, options)
-
-            // Now, trigger an update on your widget to display the alert,
-            // You can call your widget's update method directly if it's accessible
-            // Or send an intent that your widget is set to listen for, to trigger the update
-            updateAppWidget(context, appWidgetManager, appWidgetId)
+            // Register the channel with the system
+            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(notificationChannel)
         }
     }
+
+    private fun updateWidgetNotification(title: String, message: String){
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        //simple notification for demonstration
+
+        val notification = Notification.Builder(this, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .build()
+
+        notificationManager.notify(0, notification)
+
+        //update widget
+
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val theWidget = ComponentName(this, MyWidget::class.java)
+        val allWidgetIds = appWidgetManager.getAppWidgetIds(theWidget)
+
+        MyWidget.updateNotificationWidget(this, appWidgetManager, allWidgetIds, title, message)
+    }
+
+
 
 }

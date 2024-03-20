@@ -11,7 +11,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.RemoteViews
 
-
+/**
+ * https://github.com/lukemifsud/MobileDev
+ */
 class MyWidget : AppWidgetProvider() {
     override fun onUpdate(
         context: Context,
@@ -20,6 +22,28 @@ class MyWidget : AppWidgetProvider() {
     ){
         appWidgetIds.forEach { appWidgetId ->
             updateAppWidget(context, appWidgetManager, appWidgetId)
+        }
+
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        appWidgetIds?.forEach { appWidgetId ->
+            val views: RemoteViews = RemoteViews(
+                context?.packageName,
+                R.layout.widget_layout
+            ).also {
+                it.setTextViewText(R.id.weatherAlert, "Waiting for weather alerts...")
+            }
+            appWidgetManager?.updateAppWidget(appWidgetId, views)
+        }
+    }
+
+    companion object {
+        fun updateNotificationWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, title: String, message: String){
+            for(appWidgetId in appWidgetIds){
+                val views = RemoteViews(context.packageName, R.layout.widget_layout).apply{
+                    setTextViewText(R.id.weatherAlert, "$title: $message")
+                }
+                appWidgetManager.updateAppWidget(appWidgetId, views)
+            }
         }
     }
 
@@ -69,8 +93,8 @@ class MyWidget : AppWidgetProvider() {
         if (weatherAlert != null) {
             // Handle the display of weather alert in the widget
             // Example: Update a TextView with the weather alert
-            views.setViewVisibility(R.id.weatherAlertText, View.VISIBLE)
-            views.setTextViewText(R.id.weatherAlertText, weatherAlert)
+            views.setViewVisibility(R.id.weatherAlert, View.VISIBLE)
+            views.setTextViewText(R.id.weatherAlert, weatherAlert)
             // Optionally, reset the weather alert to null after displaying it
             val options = Bundle()
             options.putString("weatherAlert", null)
